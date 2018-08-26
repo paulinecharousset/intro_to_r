@@ -1,0 +1,303 @@
+---
+title: "Machine Learning Workshop"
+author: "Hannah Bull"
+date: "May 30, 2018"
+output: 
+  html_document:
+    theme: cosmo
+    code_folding: hide
+bibliography: bibliography.bib
+---
+
+<style>
+  body {background-color:lavender}
+</style>
+
+```{r setup, include=FALSE}
+require(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/home/hannah/repos/predicting-poverty")
+require("RcppCNPy")
+require("SuperLearner")
+require("ggplot2")
+require("raster")
+require("sp")
+require("rgdal")
+require("rgeos")
+```
+![Source: NASA Earth Observatory](dnb_land_ocean_ice.2012.3600x1800.jpg)
+
+## Introduction
+
+The goal of this workshop is to try out a number of classic machine learning techniques using R in order to train a model to estimate poverty from satellite data. We will use the R package SuperLearner.
+
+This workshop is based on the paper "Combining Satellite Imagery and Machine Learning to Predict Poverty" (@jean2016combining). Information on this project can also be found [at this website](http://sustain.stanford.edu/predicting-poverty/). **Disclaimer**: I have nothing to do with this project, I simply chose this topic as an example of applied machine learning for its relevance to the theme of the conference. 
+
+High-quality satellite data of every place in the world is the world, making it a useful source of development indicators where other data, such as census or survey data, is scarce. For example, nightlights have frequently been used to measure development. @jean2016combining shows that using daytime satellite images in addition to nightlights significantly improves estimates of consumption and assets in numerous sub-saharan African countries. 
+
+In this workshop, we will reproduce and develop aspects of this paper. The workshop is in two parts. 
+
+1. Firstly, we will estimate and test a simple model to estimate consumption using nighttime luminocity using Nigerian data. We will test the model on data from Tanzania. 
+
+2. Secondly, we will train a model to estimate consumption using both daytime and nighttime satellite images of the 500 locations in Nigeria. Here, we will try numerous machine learning algorithms to reduce the dimensionality of the problem and to predict the outcome, and either choose the best method or stack multiple models together to find a better method. We will use cross-validation methods to select the best performing model. We will test the model on data from Tanzania. 
+
+## Pre-workshop preparation
+
+Install and load the following packages in R: SuperLearner, ggplot2, raster, sp, rgdal, rgeos. 
+
+```{r installpackages, eval=F}
+# Method 1
+list.of.packages <- c("SuperLearner", "ggplot2", "raster", "sp", "rgdal", "rgeos")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos = "http://cran.us.r-project.org")
+# Method 2
+install.packages("SuperLearner")
+install.packages("ggplot2")
+install.packages("raster")
+install.packages("sp")
+install.packages("rgdal")
+install.packages("rgeos")
+```
+
+Download the LSMS surveys for Nigeria and for Tanzania for 2012-2013 from the World Bank website. You will need to create an account to download the data. (Website: http://surveys.worldbank.org/lsms/integrated-surveys-agriculture-ISA.)
+
+On the day of the workshop, the cleaned survey data will be available to download from here [add link].
+
+## Part 1: Estimating consumption using nighttime luminocity
+
+### Set up
+
+Change your working directly to the source folder. 
+
+```{r setwd, warning=F}
+# My working directory
+setwd("/home/hannah/repos/predicting-poverty")
+```
+
+Download and load the packages: SuperLearner, ggplot2, raster, sp, rgdal, rgeos. 
+
+```{r addpackages}
+# Installs packages if not already installed, then loads packages 
+list.of.packages <- c("SuperLearner", "ggplot2", "raster", "sp", "rgdal", "rgeos")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos = "http://cran.us.r-project.org")
+
+invisible(lapply(list.of.packages, library, character.only = TRUE))
+```
+
+Load the following datasets from the folder "Data": 
+
+1. consumptions.rds - This is the consumption data from the World Bank's Living Standard Measurment Survey for Nigeria for 2012-13 
+
+2. conv_features.rds - This is a dataset containing a list of features for the daytime satellite images
+
+3. Nigeriaonly.tif - This is an image of the nightlights in Nigeria from 2013, downloaded from https://www.ngdc.noaa.gov/
+
+4. nigeriaclusterblocks (shapefile) - This is the geographical data from the Nigerian survey data 
+
+5. nigeriamaps (shapefile) - This is the outline of Nigeria, not necessary except to make a nice plot
+
+
+
+```{r adddata}
+consumptions <- readRDS("data/output/LSMS/nigeria/consumptions.rds")
+consumptions <- log(consumptions)
+nig_nightlights <- raster("data/input/Nightlights/2013/Nigeriaonly.tif", col=)
+clusters_blocks <- readOGR("data/shapefiles/", "nigeriaclusterblocks", verbose = FALSE)
+nigeriamap <- readOGR("data/shapefiles/", "mapofnigeria", verbose = FALSE)
+```
+### Exploring the data 
+
+Display the luminosity of the nightlights and add the shapefile of the cluster blocks from the household survey data.
+ 
+```{r nightlightsnigeria}
+plot(nig_nightlights)
+plot(nigeriamap, bg="transparent", add=TRUE)
+### Add blocks for which we have data
+# plot(clusters_blocks, bg="transparent", add=TRUE)
+```
+
+Zoom in to one of the cluster blocks from the household survey data. 
+
+```{r nightlightsnigeriablock}
+### Zoom in to a block
+temp <- crop(nig_nightlights, clusters_blocks[clusters_blocks@data$ID==45,]) 
+plot(temp)
+```
+
+### Create a dataframe with the mean luminocity of each block
+
+Here we extract the mean luminosity from each survey block.  
+
+```{r getnightlightfeatures}
+# nightlights_get <- c()
+# for (i in 1:length(clusters_blocks@data$ID)){
+#   nig_nightlights_crop <- crop(nig_nightlights, clusters_blocks[clusters_blocks@data$ID==i,])
+#   nightlights_get <- c(nightlights_get, mean(nig_nightlights_crop@data@values))
+#   print(i)
+# }
+# saveRDS(nightlights_get, "data/output/LSMS/nigeria/nightlights2.rds")
+nightlights <- readRDS("data/output/LSMS/nigeria/nightlights2.rds")
+```
+
+Display consumption and mean lumniosity on a graph. 
+
+```{r firstapplysl}
+training <- data.frame(consumptions, nightlights)
+ggplot(training, aes(nightlights ,consumptions)) + geom_point() + geom_smooth(method = "loess")
+```
+
+We will now use basic machine learning techniques to predict consumption using nightlights in order to demonstrate the functionalities of the R package SuperLearner.
+
+### SuperLearner with R
+
+The R package Superlearner is a simple way to implement a wide library of machine learning algorithms and to choose the best algorithm. We will first use it for this simple example predicting consumption with one explicative variable - luminosity.  
+
+The key arguments of the function SuperLearner are: 
+
+Argument      | Description
+------------- | -------------
+Y (required)             | Vector of Y values
+X (required)          | Dataframe of X values
+newX          | X not used to train model but on which the outcome is predicted
+SL.library (required)  | ML algorithm
+verbose | Print details (TRUE/FALSE)
+family        | Distribution of error terms (e.g. gaussian() or binomial())
+method | Method for estimating super learner coefficients (default: Non-negative least squares)
+id | Cluster id variable
+obsWeights | Observation weights
+cvControl | Method for cross validation control, e.g. to change the number of folds
+
+A list of functions available for the value of SL.library can be found by typing ```listWrappers()```. Some key functions are as follows: 
+
+Values for SL.library      | Description
+------------- | -------------
+SL.lm | Linear model
+SL.glm | Generalised linear model
+SL.glmnet | Penalised ridge regression using elastic net (alpha=0 for ridge, alpha=1 for lasso)
+SL.bartMachine | Bayesian additive regression trees
+SL.extraTrees | Extremely randomised trees: a variant of random forests
+SL.kernelKnn | K nearest neighbours 
+SL.ksvm | Support vector machine
+
+For example, can evaluate the function SuperLearner on our simple data set with consumption and mean luminosity. 
+
+```{r linmod}
+sl_lm = SuperLearner(Y = consumptions, 
+                  X = data.frame(nightlights), family = gaussian(), SL.library = "SL.lm", cvControl = list(V=10))
+sl_lm
+```
+
+The value "Risk" is the mean squared error (we could customise it to be another function). This is what we are attempting to minimise. The value "Coef" is the weight allocated to this model by the super learner. As we only have one model, the weight is 1. 
+
+We can compare a linear model with a k-nearest neighbours model. 
+
+```{r 2modssl}
+#install.packages("KernelKnn")
+library("KernelKnn")
+sl_2 = SuperLearner(Y = consumptions, 
+                  X = data.frame(nightlights), family = gaussian(), SL.library = c("SL.lm", "SL.kernelKnn"), 
+                  cvControl = list(V=10))
+sl_2
+```
+The k-nearest neighbours model performs better than the linear model. However, here, our super learner optimally combines the k-nearest neighbours model with the linear model to give a model better than both. A weight of about 0.6 is given to the k-nearest neighbours model and a weight of about 0.4 is given to the linear model. To get an estimation of the risk of the super learner using cross validation, we use the command CV.SuperLearner. 
+
+```{r cvsl2}
+cv_sl_2 = CV.SuperLearner(Y = consumptions, 
+                  X = data.frame(nightlights), family = gaussian(), 
+                  SL.library = c("SL.lm", "SL.kernelKnn"), cvControl = list(V=10))
+summary(cv_sl_2)
+```
+
+We can now apply this model to the test set: data from Tanzania. 
+
+```{r loadtestset}
+# testset <- readRDS("tanzanianightlights.rds")
+testset <- nightlights
+pred <- predict(sl_2, data.frame(nightlights), onlySL = T)
+```
+We plot consumption as measured by surveys against the predicted consumption, and compute the mean squared error. 
+
+```{r teststats}
+predictedtest <- data.frame(consumptions, pred)
+ggplot(predictedtest, aes(pred ,consumptions)) + geom_point() + geom_abline(slope=1, intercept=0)
+mse = mean((consumptions-pred$pred[, 1])^2)
+print(mse)
+```
+
+### Recap
+
+In this section, we have: 
+
+* Used SuperLearner to select the best combination of models to predict consumption using luminocity. The best model is chosen using cross validation. 
+* We have predicted consumption using luminocity on unseen data, and measured the error. 
+
+## Part 2: Estimating consumption using nighttime luminocity
+
+The previous part demonstrated SuperLearner with a simple case where we only used one predictor. However, with many predictors, it is necessary to reduce the dimensionality of the problem in order to avoid over-fitting. This section combines screening algorithms to reduce dimension with prediction algorithms.
+
+### The black box of the workshop: daytime satellite data 
+
+![Source: Google Maps](examplesatellite.png)
+
+The daytime satellite pictures provide far more detailed information than the nighttime luminocity images. In order to extract information from the satellite images, @jean2016combining use a convolutional neural network to extract features from the satellite images relevant for predicting nighttime luminocity. They extract 4069 features for each cluster block. These features are, for example, roads, houses, green areas, lakes etc.. This convolutional neural network was trained using a database called [ImageNet](http://www.image-net.org/). This is outside the scope of this workshop, so we will simply load the database containing the features. 
+
+```{r loadfeats}
+conv_features <- readRDS("data/output/LSMS/nigeria/conv_features.rds")
+require("FactoMineR")
+
+respca <- PCA(conv_features, ncp = 40, graph = FALSE)
+conv_features400 <- respca$ind$coord
+
+```
+
+```{r writescreen}
+
+ridge = create.Learner("SL.glmnet", params = list(alpha = 0))
+ridge$name
+
+
+
+```
+
+### Screening algorithms in SuperLearner
+
+Screening algorithms reduce the dimension of the predictors, before applying a predictive algorithm. Two examples are principal component analysis and the elastic net. The syntax of the screening algorithm in SuperLearner is:
+
+``` SL.library=list(c("SL.pred_1", "screen.scr_1"), c("SL.pred_2", "screen.scr_2"), "SL.pred_3") ```
+
+```{r applyscreen}
+#install.packages("glmnet")
+#install.packages("SIS")
+# library("glmnet")
+# library("SIS")
+# SL.library <- list(c("SL.kernelKnn", "screen.glmnet"))
+SL.library <- list(c("SL.randomForest", "screen.corP"), "SL.randomForest", c("SL.kernelKnn", "screen.corP"))
+sl_day <- SuperLearner(Y = consumptions,
+                  X = data.frame(conv_features400, nightlights), family = gaussian(),
+                  SL.library = SL.library, cvControl = list(V=10))
+sl_day
+```
+
+
+```{r applyscreen}
+cv_sl_day <- CV.SuperLearner(Y = consumptions,
+                  X = data.frame(conv_features400, nightlights), family = gaussian(),
+                  SL.library = SL.library, cvControl = list(V=10))
+summary(cv_sl_day)
+```
+
+
+### Apply to test set
+
+Finally, we test our trained model on Tanzanian data. 
+
+## Bibliography
+
+SuperLearner package: https://cran.r-project.org/web/packages/SuperLearner/SuperLearner.pdf
+
+
+
+
+
+

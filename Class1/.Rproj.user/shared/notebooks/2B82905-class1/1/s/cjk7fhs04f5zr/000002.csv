@@ -1,0 +1,3 @@
+"0","paris <- df %>% "
+"0","  subset(DEP==""75"") %>%"
+"0","  select(IRIS, COM, TYP_IRIS, P13_POP, P13_POP0014:P13_POP75P) "

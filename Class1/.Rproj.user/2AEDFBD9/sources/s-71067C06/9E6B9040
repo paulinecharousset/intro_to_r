@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1535285432051.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3018123104",
+    "id" : "9E6B9040",
+    "lastKnownWriteTime" : 1535288617,
+    "last_content_update" : 1535288617064,
+    "path" : "~/repos/introtor/Class1/Scripts/paris_clearning.R",
+    "project_path" : "Scripts/paris_clearning.R",
+    "properties" : {
+        "cursorPosition" : "13,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

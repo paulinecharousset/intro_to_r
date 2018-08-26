@@ -1,0 +1,4 @@
+"0","iristoplot <- irisshp %>%"
+"0","  # mutate(P13_POP75P_pc=ifelse(TYP_IRIS==""H"", P13_POP75P_pc, NA)) %>%  ### optional line to exclude IRISes with no or few inhabitants"
+"0","  select(P13_POP75P_pc) "
+"0","plot(iristoplot)"

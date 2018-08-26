@@ -1,0 +1,7 @@
+"0","arrd <- iris %>% "
+"0","  select(COM, P13_POP, P13_POP0014:P13_POP75P) %>%"
+"0","  group_by(COM) %>%"
+"0","  summarise_all(funs(sum(.))) %>%"
+"0","  ungroup %>%"
+"0","  mutate_at(vars(P13_POP0014:P13_POP75P), funs(pc=./P13_POP)) %>%"
+"0","  mutate_if(is.numeric, funs(ifelse(is.nan(.), 0, .)))"
