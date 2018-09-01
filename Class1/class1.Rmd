@@ -1,7 +1,5 @@
 ---
 title: "Class 1: Introduction to data wrangling with the tidyverse"
-author: "Hannah Bull"
-date: "Semester 1, 2018"
 output: 
  html_document:
     number_sections: true
@@ -78,7 +76,7 @@ invisible(lapply(list.of.packages, library, character.only = TRUE))
 
 # Reading data 
 
-All the data for today's exercise can be downloaded from [here](https://drive.google.com/open?id=115sQqs8LVqQmsKYRORTIAu3KZvUHczh0). Although I provide sources, you do not need to download the data from a given source. 
+All the data for today's exercise can be downloaded from [here](https://drive.google.com/open?id=115sQqs8LVqQmsKYRORTIAu3KZvUHczh0). Although we provide sources, you do not need to download the data from a given source. 
 
 For this exercise, we use the French population data at the IRIS level (50k units in metropolitan France) that can be downloaded from the [Insee website](https://www.insee.fr/fr/statistiques/2386737). The shapefiles for the IRIS can be downloaded from [here](http://professionnels.ign.fr/contoursiris). The shapefiles for the arrondissements in Paris can be downloaded from [here](https://opendata.paris.fr/explore/dataset/arrondissements/).
 
