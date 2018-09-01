@@ -1,5 +1,5 @@
 ---
-title: "Class 1: Introduction to data wrangling with the tidyverse"
+title: "Class 2: Introduction to regressions and ggplot2 with R"
 author: "Hannah Bull"
 date: "Semester 1, 2018"
 output: 
@@ -19,10 +19,6 @@ knitr::opts_chunk$set(echo = TRUE)
 require("tidyverse")
 require("sf")
 require("DT")
-iris <- readRDS("Output/iris.rds")
-arrd <- readRDS("Output/arrd.rds") %>% select(Arrondissement=COM, P13_POP0014_pc:P13_POP75P_pc) %>% 
-  mutate(Arrondissement = substr(Arrondissement, 4, 5)) %>%
-  mutate(Arrondissement = paste0("Paris ", Arrondissement))
 ```
 
 # Today's exercise
@@ -108,9 +104,9 @@ We can check that our dataframe `df` is how we want it to be by typing `View(df)
 
 There are other packages inside the tidyverse that can be used to read most other classic types of data, for example: `read_csv`, `read_xls`, `read_dta`, `read_sas`, `read_sav`. These functions work similarly. 
 
-## The tibble in R 
+## The data frame in R 
 
-A tibble in R is a standard R object used to store databases. It is the more modern version of a data frame. A tibble consists of rows and columns, where the columns contain one of five basic classes of data. 
+A data frame in R is a standard R object used to store databases. A data frame consists of rows and columns, where the columns contain one of five basic classes of data. 
 
 1. logical (e.g., TRUE, FALSE)
 2. integer (e.g., 213, as.integer(3))
@@ -124,7 +120,7 @@ Each of the columns may be accessed by their name, e.g. `df$IRIS`, or by their n
 
 # The dplyr pipe function
 
-The pipe function is part of the package `dplyr` in the tidyverse, and is used to simply transform a tibble. A cheat sheet for the `dplyr` package can by found by clicking Help -> Cheatsheets -> Data Transformation with dplyr, or [at this link](https://www.rstudio.org/links/data_transformation_cheat_sheet).
+The pipe function is part of the package `dplyr` in the tidyverse, and is used to simply transform a data frame. A cheat sheet for the `dplyr` package can by found by clicking Help -> Cheatsheets -> Data Transformation with dplyr, or [at this link](https://www.rstudio.org/links/data_transformation_cheat_sheet).
 
 ![The pipe function](Data/images/pipe.png)
 
@@ -201,8 +197,8 @@ iris <- df %>%
   mutate(TYP_IRIS = as.factor(TYP_IRIS)) %>%
   mutate_at(vars(P13_POP0014:P13_POP75P), funs(pc=./P13_POP)) %>%
   mutate_if(is.numeric, funs(ifelse(is.nan(.), 0, .))) %>%
-  mutate(name_arrd = substr(COM, 4, 5)) %>%
-  mutate(name_arrd = paste0("Paris ", name_arrd)) 
+  mutate(COM = substr(COM, 4, 5)) %>%
+  mutate(COM = paste0("Paris ", COM))
 ```
 
 ## Grouping and aggregating variables
@@ -235,7 +231,7 @@ wide <- long %>%
 
 ## Writing data 
 
-We can write data in .csv format using `write_csv`. We can also use .rds format (r dataset) in order to preserve the tibble attributes, such as which variables are factor variables. 
+We can write data in .csv format using `write_csv`. We can also use .rds format (r dataset) in order to preserve the data frame attributes, such as which variables are factor variables. 
 
 ```{r savingdata, warning=FALSE,message=FALSE,error=FALSE}
 iris <- df %>% 
@@ -276,7 +272,7 @@ We will apply a join with geographical data, in order to display our variables o
 
 ### Import geographical data
 
-Shapefiles are a common format of geographical data. We can import them using the package `sf`, which is not part of the tidyverse, but follows the same syntax. We select only the variable corresponding to the IRIS code, and call this `IRIS` to match our other data set. We then apply a `right_join` to join our data to the geographical data to the iris tibble that we have created. 
+Shapefiles are a common format of geographical data. We can import them using the package `sf`, which is not part of the tidyverse, but follows the same syntax. We select only the variable corresponding to the IRIS code, and call this `IRIS` to match our other data set. We then apply a `right_join` to join our data to the geographical data to the iris data frame that we have created. 
 
 ```{r irisshp, warning=FALSE,message=FALSE,error=FALSE}
 irisshp <- read_sf(dsn = "Data/iris", layer = "CONTOURS-IRIS") %>%

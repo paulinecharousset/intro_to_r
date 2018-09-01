@@ -1,0 +1,1 @@
+"0","df <- read_delim(file = ""Data/base-ic-evol-struct-pop-2013.csv"", delim = "","", col_names = TRUE, skip = 5, locale = locale(encoding = ""UTF-8""))"

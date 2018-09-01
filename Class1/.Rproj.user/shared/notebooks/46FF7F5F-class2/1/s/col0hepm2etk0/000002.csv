@@ -1,0 +1,6 @@
+"0","### installs if necessary and loads tidyverse and readxl"
+"0","### readxl is a package which is part of the tidyverse but not part of the core tidyverse loaded with library(""tidyverse"")"
+"0","list.of.packages <- c(""tidyverse"", ""readxl"", ""sf"")"
+"0","new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,""Package""])]"
+"0","if(length(new.packages)) install.packages(new.packages, repos = ""http://cran.us.r-project.org"")"
+"0","invisible(lapply(list.of.packages, library, character.only = TRUE))"
