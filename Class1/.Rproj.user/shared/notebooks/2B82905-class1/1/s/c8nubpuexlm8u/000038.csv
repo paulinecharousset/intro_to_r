@@ -1,3 +1,0 @@
-"0","### to save plot use these two lines"
-"0","# dev.copy(pdf, 'Output/age.pdf')"
-"0","# dev.off()"

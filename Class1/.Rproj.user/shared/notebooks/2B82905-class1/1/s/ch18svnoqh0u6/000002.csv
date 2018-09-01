@@ -1,8 +1,0 @@
-"0","iris <- df %>% "
-"0","  subset(DEP==""75"") %>%"
-"0","  select(IRIS, COM, TYP_IRIS, P13_POP, P13_POP0014:P13_POP75P) %>%"
-"0","  mutate(TYP_IRIS = as.factor(TYP_IRIS)) %>%"
-"0","  mutate_at(vars(P13_POP0014:P13_POP75P), funs(pc=./P13_POP)) %>%"
-"0","  mutate_if(is.numeric, funs(ifelse(is.nan(.), 0, .))) %>%"
-"0","  mutate(COM = substr(COM, 4, 5)) %>%"
-"0","  mutate(COM = paste0(""Paris "", COM))"

@@ -1,5 +1,0 @@
-"0","knitr::opts_chunk$set(echo = TRUE)"
-"0","# knitr::opts_knit$set(root.dir = ""/home/hannah/repos/introtor"")"
-"0","require(""tidyverse"")"
-"0","require(""sf"")"
-"0","require(""DT"")"
