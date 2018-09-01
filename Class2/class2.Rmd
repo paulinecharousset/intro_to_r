@@ -30,7 +30,6 @@ Our aim for today is to clean and explore a dataset coming from a survey on youn
 ## Installing packages 
 
 For this exercise, you will need to install `descr`, which is not part of the tidyverse. You will need to load the `tidyverse`, `descr` and `broom`, the latter of which is part of the tidyverse but not loaded with the command `library("broom")` as it is not part of the core tidyverse. 
-Do not forget to load the package once it's installed.
 
 ```{r installggplot2, warning=FALSE, message=FALSE, error=FALSE}
 ### Basic option: installing and loading packages
