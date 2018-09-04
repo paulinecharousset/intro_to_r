@@ -1,0 +1,47 @@
+---
+title: "Class 3: Writing reproducible articles using R Markdown"
+output:
+  html_document:
+    number_sections: true
+    theme: cosmo
+    code_folding: hide
+---
+  
+  <style>
+  body {background-color:lavender}
+</style>
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require("tidyverse")
+```
+
+# Pre-class preparation
+
+## Download MiKTeX or TexLive
+
+You will need to download MiKTeX or TexLive for this class.
+
+Windows: MiKTeX (Complete) - http://miktex.org/2.9/setup
+(NOTE: Be sure to download the Complete rather than Basic installation)
+
+Mac OS X: TexLive 2013 (Full) - http://tug.org/mactex/
+(NOTE: Downloading with Safari rather than Chrome is strongly recommended)
+
+Linux: `sudo apt-get install texlive-full`
+
+## Test that you can create a pdf R Markdown file
+
+1. Install package `knitr` (command `install.packages("knitr")`) 
+2. Click File -> New File -> R Markdown 
+3. Choose PDF output 
+
+![Choose PDF output](Data/images/rmarkdown.png)  
+
+4. Save file (file extension is .rmd)
+5. Click `Knit` (at the top of the window)  
+
+![Click Knit](Data/images/knit.png)  
+
+
+6. You should then see a pdf file open. If not, read the error messages and try to resolve the problem. We are also here to help!  

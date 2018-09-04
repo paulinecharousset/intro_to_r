@@ -1,6 +1,6 @@
 ---
 title: "Introduction to R"
-author: "Hannah Bull and Pauline Charrousset"
+author: "Hannah Bull and Pauline Charousset"
 date: "Semester 1, 2018"
 output: 
  html_document:
@@ -21,3 +21,10 @@ Please download R and RStudio before the first class. You can find installation 
 [Class 1](https://introtor-pse.appspot.com/class1.html)
 
 [Class 2](https://introtor-pse.appspot.com/class2.html)
+
+[Class 3](https://introtor-pse.appspot.com/class3.html)
+
+
+# APE slack channel 
+
+[Slack invitation link](https://join.slack.com/t/introtor/shared_invite/enQtNDE5NDQ1NDk3ODQxLWE3ZTMxMzA2YTBmYTY3ZDUxMjkyZDM2OTc4MTAxY2VjZjE0NzE5NTMyNmUzOTA0ZGI4NGQ1ZTEzZmQ3ZGNmYWE)
