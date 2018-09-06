@@ -14,3 +14,7 @@ handlers:
 - url: /class2\.html
   static_files: www/class2.html
   upload: www/class2.html
+
+- url: /class3\.html
+  static_files: www/class3.html
+  upload: www/class3.html

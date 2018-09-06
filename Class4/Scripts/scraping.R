@@ -2,13 +2,13 @@ library("tidyverse")
 library("rvest")
 library("stringr")
 
-heads <- "https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government" %>%
+get_heads_tab <- "https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government" %>%
     read_html() %>%
-    html_nodes(xpath = '//*[@id="mw-content-text"]/div/table[2]') %>%
+    html_nodes(xpath = '/html/body/div[3]/div[3]/div[4]/div/table[2]') %>%
     html_table(fill=TRUE) %>%
     .[[1]]
 
-headstab <- heads %>%
+heads <- get_heads_tab %>%
   mutate(leader = gsub(".*– ", "", `Head of government`)) %>%
   mutate(leader = gsub("^Sheikh |^Cardinal |^Prince ", "", leader)) %>%
   mutate(leader = gsub(" \\(.*$|\\[.*$", "", leader)) %>%
@@ -17,38 +17,46 @@ headstab <- heads %>%
   select(State, leader) %>%
   filter(!duplicated(State))
 
-get_link_leader <- function(text){
+get_link_leader_example <-  "https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government" %>%
+  read_html() %>%
+  html_nodes(xpath="//a[text()='Alain Berset']") %>% 
+  .[[1]] %>% 
+  html_attr("href")
+
+get_link_leader <- function(leader_name){
   "https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government" %>%
     read_html() %>%
-    html_nodes(xpath=paste0("//a[text()='", text, "']")) %>% 
+    html_nodes(xpath=paste0("//a[text()='", leader_name, "']")) %>% 
     .[[1]] %>% 
     html_attr("href")
 }
 
-headstab$link <- ""
-for (i in 1:nrow(headstab)) {
+heads$link <- ""
+for (i in 1:nrow(heads)) {
   tryCatch({
-    headstab$link[i] <- get_link_leader(headstab$leader[i])
-    print(paste("Got link for leader", headstab$leader[i]))
+    heads$link[i] <- get_link_leader(heads$leader[i])
+    print(paste("Got link for leader", heads$leader[i]))
   }, error = function(e) {
-    print(paste("Error for", headstab$leader[i]))
+    print(paste("Error for", heads$leader[i]))
   })
 }
 
-headstab <- headstab %>%
+heads <- heads %>%
   mutate(link=ifelse(State=="Papua New Guinea", "/wiki/Peter_O%27Neill", link))
 
-partyexample <- "https://en.wikipedia.org/wiki/Jacinda_Ardern" %>%
+### Get information on parties
+
+get_party_example <- "https://en.wikipedia.org/wiki/Donald_Trump" %>%
   read_html() %>%
   html_nodes(xpath='//table[contains(@class, "infobox")]') %>%
   html_table(fill=TRUE) %>%
   .[[1]] %>%
   set_tidy_names() %>%
-  filter(.[,1] == "*olitical.*arty") %>%
+  filter(grepl("*olitical.*arty", .[,1])) %>%
   .[1,2]
 
-get_political_party <- function(personlink) {
-  paste0("https://en.wikipedia.org", personlink) %>%
+get_party <- function(leader_link) {
+  paste0("https://en.wikipedia.org", leader_link) %>%
     read_html() %>%
     html_nodes(xpath='//table[contains(@class, "infobox")]') %>%
     html_table(fill=TRUE) %>%
@@ -58,43 +66,43 @@ get_political_party <- function(personlink) {
     .[1,2]
 }
 
-headstab$political_party <- ""
-for (i in 1:nrow(headstab)) {
+heads$political_party <- ""
+for (i in 1:nrow(heads)) {
   tryCatch({
-    headstab$political_party[i] <- get_political_party(headstab$link[i])
-    print(paste("Done", headstab$leader[i]))
+    heads$political_party[i] <- get_party(heads$link[i])
+    print(paste("Done", heads$leader[i]))
   }, error = function(e) {
-    print(paste("Error for", headstab$leader[i]))
+    print(paste("Error for", heads$leader[i]))
   })
 }
 
-linkpartyex <-   paste0("https://en.wikipedia.org/wiki/Dmitry_Medvedev") %>%
+get_link_party_example <- "https://en.wikipedia.org/wiki/%C3%89douard_Philippe" %>%
   read_html() %>%
   html_nodes(xpath='//table[contains(@class, "infobox")]/tbody/tr/th[text()="Political party"]/../td/a') %>%
   html_attr("href") %>%
   tail(., n=1)
 
-get_link_party <- function(personlink, text){
-  paste0("https://en.wikipedia.org", personlink) %>%
+get_link_party <- function(leader_link){
+  paste0("https://en.wikipedia.org", leader_link) %>%
     read_html() %>%
     html_nodes(xpath='//table[contains(@class, "infobox")]/tbody/tr/th[text()="Political party"]/../td/a') %>%
-    html_attr("href")
+    html_attr("href") %>%
+    tail(., n=1)
 }
-
-headstab <- headstab %>%
-  mutate(political_party = gsub(" \\(.*$|\\[.*$", "", political_party)) 
   
-headstab$link_party <- ""
-for (i in 1:nrow(headstab)) {
+heads$link_party <- ""
+for (i in 1:nrow(heads)) {
   tryCatch({
-    headstab$link_party[i] <- get_link_party(headstab$link[i], headstab$political_party_first[i])
-    print(paste("Got link for party of", headstab$leader[i]))
+    heads$link_party[i] <- get_link_party(heads$link[i])
+    print(paste("Got link for party of", heads$leader[i]))
   }, error = function(e) {
-    print(paste("Error for", headstab$leader[i]))
+    print(paste("Error for", heads$leader[i]))
   })
 }
 
-partytypeexample <- "https://en.wikipedia.org/wiki/Socialist_Party_of_Albania" %>%
+### Exercise
+
+get_political_position_example <- "https://en.wikipedia.org/wiki/Socialist_Party_of_Albania" %>%
   read_html() %>%
   html_nodes(xpath='//table[contains(@class, "infobox")]') %>%
   html_table(fill=TRUE) %>%
@@ -103,8 +111,8 @@ partytypeexample <- "https://en.wikipedia.org/wiki/Socialist_Party_of_Albania" %
   filter(grepl('*olitical.*osition', .[,1])) %>%
   .[1,2]
 
-get_political_position <- function(partylink){
-  paste0("https://en.wikipedia.org", partylink) %>%
+get_political_position <- function(party_link){
+  paste0("https://en.wikipedia.org", party_link) %>%
     read_html() %>%
     html_nodes(xpath='//table[contains(@class, "infobox")]') %>%
     html_table(fill=TRUE) %>%
@@ -114,57 +122,54 @@ get_political_position <- function(partylink){
     .[1,2]
 }
 
-headstab$political_position <- ""
-for (i in 1:nrow(headstab)) {
+heads$political_position <- ""
+for (i in 1:nrow(heads)) {
   tryCatch({
-    headstab$political_position[i] <- get_political_position(headstab$link_party[i])
-    print(paste("Got political position of", headstab$leader[i]))
+    heads$political_position[i] <- get_political_position(heads$link_party[i])
+    print(paste("Got political position of", heads$leader[i]))
   }, error = function(e) {
-    print(paste("Error for", headstab$leader[i]))
+    print(paste("Error for", heads$leader[i]))
   })
 }
 
 library("countrycode")
 library("maps")
 
-
-headstab <- headstab %>%
-  mutate(pos=gsub("\\(.*\\)|\\[.*\\]", "", political_position)) %>%
-  mutate(pos=gsub("Current:", "", pos)) %>%
-  mutate(pos=gsub("Histor.*", "", pos)) %>%
-  mutate(pos=gsub("de facto.*", "", pos)) %>%
-  mutate(pos=gsub("de jure :", "", pos)) %>%
-  mutate(pos=gsub("-", " ", pos)) %>%
-  mutate(pos=gsub("big tent of the left", "big tent", pos)) %>%
-  mutate(pos=tolower(pos)) %>%
-  mutate(pos=str_trim(pos)) %>%
-  mutate(pos=ifelse(pos=="", NA, pos)) %>%
-  mutate(pos=as_factor(pos)) %>%
+heads <- heads %>%
+  mutate(political_position_clean=gsub("\\(.*\\)|\\[.*\\]", "", political_position)) %>%
+  mutate(political_position_clean=gsub("Current:", "", political_position_clean)) %>%
+  mutate(political_position_clean=gsub("Histor.*", "", political_position_clean)) %>%
+  mutate(political_position_clean=gsub("de facto.*", "", political_position_clean)) %>%
+  mutate(political_position_clean=gsub("de jure :", "", political_position_clean)) %>%
+  mutate(political_position_clean=gsub("-", " ", political_position_clean)) %>%
+  mutate(political_position_clean=tolower(political_position_clean)) %>%
+  mutate(political_position_clean=str_trim(political_position_clean)) %>%
+  mutate(political_position_clean=ifelse(political_position_clean=="", NA, political_position_clean)) %>%
+  mutate(political_position_clean=ifelse(is.na(political_position_clean), "unavailable", political_position_clean)) %>%
+  mutate(political_position_clean=gsub("center", "centre", political_position_clean)) %>%
+  mutate(political_position_clean=gsub("big tent of the left", "big tent", political_position_clean)) %>%
+  mutate(political_position_clean=gsub("big tent", "centre/big tent", political_position_clean)) %>%
+  mutate(political_position_clean=gsub("^centre$", "centre/big tent", political_position_clean)) %>%
+  mutate(political_position_clean=as_factor(political_position_clean)) %>%
   mutate(iso3 = countrycode(State, "country.name", "iso3c")) %>%
+  mutate(political_position_clean=factor(political_position_clean,
+                                         levels =c("far left","left wing","centre left to left wing", "centre left", 
+                                                   "centre to centre left", "centre/big tent", "centre to centre right", "centre right",
+                                                   "centre right to right wing", "right wing", "unavailable"),
+                                         labels =c("far left","left wing","centre left to left wing", "centre left", 
+                                                   "centre to centre left", "centre/big tent", "centre to centre right", "centre right",
+                                                   "centre right to right wing", "right wing", "unavailable"))) %>%
   mutate(iso3 = ifelse(State=="Micronesia", "FSM", iso3))
-  
+
 map.world <- map_data("world") %>%
   mutate(iso3 = countrycode(region, "country.name", "iso3c")) %>%
   mutate(iso3 = ifelse(region=="Micronesia", "FSM", iso3)) %>%
-  left_join(headstab, by="iso3")
+  left_join(heads, by="iso3")
 
 plot <- ggplot() +
-  geom_polygon(data = map.world, aes(x = long, y = lat, group = group, fill = pos)) +
-  scale_color_gradient("#FF0000", "#0000FF")
-  # geom_point(data = df.country_points, aes(x = lon, y = lat), color = "#e60000") +
-  # scale_fill_manual(values = c("#CCCCCC","#e60000")) +
-  # labs(title = 'Countries with highest "talent competitiveness"'
-  #      ,subtitle = "source: INSEAD, https://www.insead.edu/news/2017-global-talent-competitiveness-index-davos") +
-  # theme(text = element_text(family = "Gill Sans", color = "#FFFFFF")
-  #       ,panel.background = element_rect(fill = "#444444")
-  #       ,plot.background = element_rect(fill = "#444444")
-  #       ,panel.grid = element_blank()
-  #       ,plot.title = element_text(size = 30)
-  #       ,plot.subtitle = element_text(size = 10)
-  #       ,axis.text = element_blank()
-  #       ,axis.title = element_blank()
-  #       ,axis.ticks = element_blank()
-  #       ,legend.position = "none"
-  # )
+  geom_polygon(data = map.world, aes(x = long, y = lat, group = group, fill = political_position_clean)) +
+  scale_fill_manual(values = c("#FF0000","#E2001C","#C60038", "#AA0055", "#8D0071", 
+                               "#71008D", "#5500AA", "#3800C6","#1C00E2", "#0000FF", "#bebebe"))
 
 plot
+ggsave("Output/worldmappolitics.pdf", device = "pdf")
