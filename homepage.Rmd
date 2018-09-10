@@ -22,9 +22,18 @@ Please download R and RStudio before the first class. You can find installation 
 
 [Class 2](https://introtor-pse.appspot.com/class2.html)
 
-[Class 3](https://introtor-pse.appspot.com/class3.html)
+[Class 3 Preparation](https://introtor-pse.appspot.com/class3prep.html)
+
+[Class 3 PPD](https://introtor-pse.appspot.com/class3ppd.html)
+
+[Class 3 APE](https://introtor-pse.appspot.com/class3ape.html)
+
+[Class 4](https://introtor-pse.appspot.com/class4.html)
 
 
 # APE slack channel 
 
 [Slack invitation link](https://join.slack.com/t/introtor/shared_invite/enQtNDE5NDQ1NDk3ODQxLWE3ZTMxMzA2YTBmYTY3ZDUxMjkyZDM2OTc4MTAxY2VjZjE0NzE5NTMyNmUzOTA0ZGI4NGQ1ZTEzZmQ3ZGNmYWE)
+
+
+

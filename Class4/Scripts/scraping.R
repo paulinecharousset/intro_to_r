@@ -1,10 +1,11 @@
 library("tidyverse")
 library("rvest")
-library("stringr")
+library("countrycode")
+library("maps")
 
 get_heads_tab <- "https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government" %>%
     read_html() %>%
-    html_nodes(xpath = '/html/body/div[3]/div[3]/div[4]/div/table[2]') %>%
+    html_nodes(xpath = '/html/body/div[3]/div[3]/div[4]/div/table[3]') %>%
     html_table(fill=TRUE) %>%
     .[[1]]
 
@@ -15,7 +16,7 @@ heads <- get_heads_tab %>%
   subset(State!="Switzerland" | (State=="Switzerland" & leader=="Alain Berset")) %>%
   mutate(leader = ifelse(leader=="Hasina", "Sheikh Hasina", leader)) %>%
   select(State, leader) %>%
-  filter(!duplicated(State))
+  filter(distinct(State))
 
 get_link_leader_example <-  "https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government" %>%
   read_html() %>%
@@ -70,7 +71,7 @@ heads$political_party <- ""
 for (i in 1:nrow(heads)) {
   tryCatch({
     heads$political_party[i] <- get_party(heads$link[i])
-    print(paste("Done", heads$leader[i]))
+    print(paste("Got political party for", heads$leader[i]))
   }, error = function(e) {
     print(paste("Error for", heads$leader[i]))
   })
@@ -132,8 +133,7 @@ for (i in 1:nrow(heads)) {
   })
 }
 
-library("countrycode")
-library("maps")
+## Cleaning
 
 heads <- heads %>%
   mutate(political_position_clean=gsub("\\(.*\\)|\\[.*\\]", "", political_position)) %>%
@@ -164,12 +164,13 @@ heads <- heads %>%
 map.world <- map_data("world") %>%
   mutate(iso3 = countrycode(region, "country.name", "iso3c")) %>%
   mutate(iso3 = ifelse(region=="Micronesia", "FSM", iso3)) %>%
-  left_join(heads, by="iso3")
-
+  left_join(heads, by="iso3") %>%
+  mutate(political_position_clean=ifelse(is.na(political_position_clean), "unavailable", political_position_clean))
+  
 plot <- ggplot() +
   geom_polygon(data = map.world, aes(x = long, y = lat, group = group, fill = political_position_clean)) +
   scale_fill_manual(values = c("#FF0000","#E2001C","#C60038", "#AA0055", "#8D0071", 
-                               "#71008D", "#5500AA", "#3800C6","#1C00E2", "#0000FF", "#bebebe"))
+                               "#71008D", "#5500AA", "#3800C6","#1C00E2", "#0000FF", "#bebebe")) + coord_fixed()
 
 plot
-ggsave("Output/worldmappolitics.pdf", device = "pdf")
+ggsave("Output/worldmappolitics.jpg", width = 20, height=12, device = "jpg")
