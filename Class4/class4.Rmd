@@ -1,5 +1,5 @@
 ---
-title: "Class 4: Introduction to web scaping with R"
+title: "Class 4: Introduction to web scraping with R"
 output: 
  html_document:
     number_sections: true
@@ -135,7 +135,7 @@ Regex      | Meaning   | Some examples
 
 ## XPaths
 
-If you access the page [List of current heads of state and government](https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government) and right-click, then you can see the html code behind the website. 
+If you access the page [List of current heads of state and government](https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government) and right-click to view the source code, then you can see the html code behind the website. 
 
 Html code is structured by 'tags'. For example, the document starts with the tag `<html>` and ends with the tag `</html>`. For example, a html table is contained between the tags `<table>` and the tag `</table>`, and a link to another website is contained within the tags `<a>` and the tag `</a>`. 
 

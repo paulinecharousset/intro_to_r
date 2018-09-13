@@ -23,6 +23,15 @@ handlers:
   static_files: www/class3ppd.html
   upload: www/class3ppd.html
 
+- url: /class3ape\.html
+  static_files: www/class3ape.html
+  upload: www/class3ape.html
+
+
 - url: /class4\.html
   static_files: www/class4.html
   upload: www/class4.html
+
+- url: /class3examplehomework\.pdf
+  static_files: www/example_homework.pdf
+  upload: www/example_homework.pdf

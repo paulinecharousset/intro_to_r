@@ -7,13 +7,17 @@ output:
     code_folding: hide
 ---
   
-  <style>
+<style>
   body {background-color:lavender}
 </style>
   
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 require("tidyverse")
+require("knitr")
+require("haven")
+require("stargazer")
+
 ```
 
 # Pre-class preparation
@@ -48,34 +52,33 @@ Linux: `sudo apt-get install texlive-full`
 
 # Today's exercise
 
-We will learn the how to write down any type of document (homework, paper, slides, etc...) using Rmarkdown.  
+We will learn how to create any type of document (homework, paper, slides, etc…) in any format (PDF, html, beamer) using Rmarkdown. The main advantage of Rmarkdown is that it allows you to create a single document that includes both your text and your code.
+
+This document can then be **knitted** : you can tell R to convert your document to the format of your choice. When doing so, R reads the plain text of your document, but also evaluates the code chunks that you have included in your document. You have at your disposal a bunch of options that allow you to tell R whether the R output and code should be displayed in the final document or not.
+
+To see an example of the homework exercise, which is the goal of today's lesson, [click here](https://introtor-pse.appspot.com/class3examplehomework.pdf).
 
 # Set-up
 
 Our aim for today is to learn how to write a document that contains tables and graphs that you created in R.
 
-## Installing packages 
 
-In order to create a document using Rmarkdown, you will need to install `knitr`. 
-Do not forget to load the package once it's installed.
+## Reading the data
 
-```{r packages, warning=FALSE, message=FALSE, error=FALSE}
-list.of.packages <- c("tidyverse", "knitr", "haven")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages, repos = "http://cran.us.r-project.org")
+The data for today’s exercise can be downloaded from [here](https://drive.google.com/drive/u/1/folders/1jFcN7nzdc1J34_3koopHswNgSxXBTDU_).
 
-invisible(lapply(list.of.packages, library, character.only = TRUE))
-```
+## Opening an R markdown file 
 
+In order to open an Rmarkdown file, you can click on the **+** sign below the **File** tab that you usually use to open an R script. This time, you can select R Markdown. A window appears, where you can write down the name of your document and choose its type (PDF, html…). If you did not manage to install LaTeX on your computer before the session, select the html option.
 
-# Choosing the document type
+## Choosing the document type
 
-Your document should start with those 4 lines:
+Your document should start with this 4 lines:
 
 ```
 ---
 title: "Title"
-author: "First Name Name"
+author: "First Name Last Name"
 date: "September 10th, 2018"
 output: pdf_document
 ---
@@ -86,6 +89,18 @@ The "output" line allows you to choose the document type. Here are the most comm
 * word_document produces a word file
 * beamer_presentation produces a beamer document, i.e. slides compiled with LaTeX
 * html_document produces an html file
+
+## Installing packages 
+
+In order to create a document using Rmarkdown, you will need to install `knitr` and `stargazer`. 
+
+```{r packages, warning=FALSE, message=FALSE, error=FALSE}
+list.of.packages <- c("tidyverse", "knitr", "haven", "stargazer")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos = "http://cran.us.r-project.org")
+```
+
+In the set-up code chuck, add `require("tidyverse")`, `require("knitr")` etc. to use the packages. 
 
 # Plain text
 
@@ -158,11 +173,20 @@ df <- read_dta("Data/Score_US.dta")
 myvalue=42
 ```
 
-Say we have predefined an object `myvalue=42`. In order to display this value in the text, use `'r myvalue'` to print `r myvalue`. 
+Say we have predefined an object `myvalue=42`. In order to display this value in the text, use ` ` r myvalue ` ` to print `r myvalue`. 
 
 # Tables
 
+There are two ways to output tables in your final document:
+
+- write down the table manually in the plain text of your Rmarkdown document 
+
+- output a table that you have created in your R code 
+
+
 ## Make your table manually
+
+Type this as plain text:
 
 ```
 Row names | Values 
@@ -171,6 +195,7 @@ Row 1     | Value 1
 Row 2     | Value 2
 ```
 
+It should look like this: 
 
 Row names | Values 
 ----------| ------
@@ -180,8 +205,14 @@ Row 2     | Value 2
 ## Insert an R table
 
 
-You can insert an R table to your document using the ```kable``` function.
-Let's create a table containing summary statistics of two variables of your choice. The variables should be in rows and the different summary statistics (mean, sd, min, max) in columns. Remember that we want R to evaluate the code without displaying the code and its result in the document.
+You can insert an R table to your document using the `kable` function. The syntax is as follows: `kable(table_name, options)`. Here are the most useful options of the `kable` function:
+
+Option |	Effect
+--------------------------------- | ------------------------------
+align = c(“l”,“c”,“c”,“c”) |	First column will be aligned to the left, second to fourth columns will be centered
+col.names = c(“Name 1”, “Name 2”, “Name 3”, “Name 4”) |	Defines the columns headers
+
+Try to create a table containing some summary statistics for two variables of your choice. The variables should be in rows and the different summary statistics (mean, sd, min, max) in columns. Remember that we want R to evaluate the code without displaying the code and its result in the document.
 
 ```{r, include = FALSE}
 
@@ -225,10 +256,11 @@ table <- rbind(table1,table2)
 ```
 ````
 
-Let's now output this table to our document:
+Let’s now output this table to our document. Since we do not want to output the code to our document, we are going to use the echo= FALSE option:
+
 ````r
 `r ''````{r}
-kable(df[1:5,1:4 ], caption = 'This is my caption')
+kable(table, caption = 'This is my caption')
 ```
 ````
 
@@ -238,7 +270,14 @@ kable(table, caption = 'This is my caption')
 
 ## Make regression tables
 
-You can use the 
+You can use the R package `stargazer` to make nice tables, specifically regression tables. 
+
+For example, you can use `stargazer(table)` to produce a latex table of the previous table we created, or you can easily create a table of a regression. See [the package documentation](https://cran.r-project.org/web/packages/stargazer/vignettes/stargazer.pdf) for more details. You will need to use `results='asis'` in the options for the code chuck in order for the table to appear. 
+
+```{r, results="hide"}
+linear.1 <- lm(X1RSCALK1 ~ X1MSCALK1, data=df)
+stargazer(linear.1,  header=FALSE, type='latex')
+```
 
 # Insert Figures
 
@@ -270,4 +309,47 @@ ggplot(data = df, aes(x = df$X4RSCALK1)) +
 ```
 
 
+# Add a bibliography to the document
 
+In order to add a bibliography to the end of your document, you first need to create a .bib file in LaTeX that contains the list of references that you want to cite in BibTeX format.
+
+In order to obtain the BibTeX references of the paper, you can search for the paper in Google Scholar and select the “” sign. Then, click on BibTeX and copy and paste the reference to your .bib file.
+
+Then, add a line specifying the .bib file name to the Preamble:
+
+`bibliography: biblio.bib`
+
+You should insert the reference as follows, in you text:
+
+Blablabla, as was shown by @reference_name.
+
+This will result in:
+
+- a sentence that looks like this: Blablabla, as was shown by Author name (review year)
+- the full reference at the end of your document
+
+
+# Exercise
+
+Using the dataset of your choice, create an article template including: 
+
+- Headings and subheadings
+
+- Some text (lorem ipsum)
+
+- A summary statistics table
+
+- A ggplot
+
+- A regression table with one simple regression 
+
+- An inline value incorporated in the text
+
+- A mathematical formula in the text
+
+- A bibliography with at least 2 references
+
+
+**The article does not need to make sense!**
+
+Upload your PDF file [here](https://www.dropbox.com/request/M4Cl3CbVynlmldgCt4g9).
