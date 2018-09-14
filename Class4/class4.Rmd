@@ -127,8 +127,8 @@ Some examples:
 
 Regex      | Meaning   | Some examples
 ------------- | ------------- | -------------
-`"\\.jpg$"`             | Ending in .jpg | `"image1.jpg"`, `"Output/map.jpg"`
-`"^[A-B][:lower:]+"`       | Starting with A or B, followed by at least 1 lower case letter | `"Adam Smith"`
+`".*\\.jpg$"`             | Ending in .jpg | `"image1.jpg"`, `"Output/map.jpg"`
+`"^[A-B][:lower:]+.*"`       | Starting with A or B, followed by at least 1 lower case letter | `"Adam Smith"`
 `".*@gmail\\.com$"`       | Anything ending in @gmail.com | `"john.smith@gmail.com"`
 `"^[0-9]{5}$"`       | A string with 5 digits between 0 and 9 | `"01234"`
 
@@ -166,6 +166,9 @@ get_heads_tab <- "https://en.wikipedia.org/wiki/List_of_current_heads_of_state_a
     html_nodes(xpath = '/html/body/div[3]/div[3]/div[4]/div/table[3]') %>%
     html_table(fill=TRUE) %>%
     .[[1]]
+```
+
+```{r datatable, warning=FALSE,message=FALSE,error=FALSE}
 datatable(get_heads_tab)
 ```
 
@@ -176,6 +179,7 @@ The function `gsub` takes 3 main arguments. The first argument is a regular expr
 ```{r fungsub, warning=FALSE,message=FALSE,error=FALSE}
 heads <- get_heads_tab %>%
   mutate(leader = gsub(".*– ", "", `Head of government`)) %>%
+  mutate(leader = gsub(".*\u2013 ", "", leader)) %>% # this line is for the windows computers where the previous line does not work
   mutate(leader = gsub("^Sheikh |^Cardinal |^Prince ", "", leader)) %>%
   mutate(leader = gsub(" \\(.*$|\\[.*$", "", leader)) %>%
   subset(State!="Switzerland" | (State=="Switzerland" & leader=="Alain Berset")) %>%
