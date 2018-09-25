@@ -1,5 +1,5 @@
 ---
-title: "Class 3: Writing reproducible articles using R Markdown"
+title: "Class 3: Writing LaTeX articles and making websites using R Markdown"
 output:
   html_document:
     number_sections: true
@@ -7,7 +7,7 @@ output:
     code_folding: hide
 ---
   
-  <style>
+<style>
   body {background-color:lavender}
 </style>
   
@@ -45,6 +45,14 @@ Linux: `sudo apt-get install texlive-full`
 
 
 6. You should then see a pdf file open. If not, read the error messages and try to resolve the problem. We are also here to help!  
+
+## Supplementary instructions if the former does not work (Windows)
+
+1. Install the package `devtools` 
+
+2. Run: `devtools::install_github('yihui/tinytex')` 
+
+3. Open the MikTeX Console (find it in the search bar), and in settings select 'always install packages on the fly'
 
 # Today's exercise
 

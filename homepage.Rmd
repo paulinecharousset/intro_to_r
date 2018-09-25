@@ -18,22 +18,18 @@ Please download R and RStudio before the first class. You can find installation 
 
 # Links to classes
 
-[Class 1](https://introtor-pse.appspot.com/class1.html)
+[Class 1](https://introtor-pse.appspot.com/class1.html): Introduction to data wrangling with the tidyverse
 
-[Class 2](https://introtor-pse.appspot.com/class2.html)
+[Class 2](https://introtor-pse.appspot.com/class2.html): Inspecting, cleaning, plotting and analysing data
 
-[Class 3 Preparation](https://introtor-pse.appspot.com/class3prep.html)
+[Class 3 APE](https://introtor-pse.appspot.com/class3ape.html): Writing LaTeX articles and making websites using R Markdown
 
-[Class 3 PPD](https://introtor-pse.appspot.com/class3ppd.html)
+[Class 3 PPD](https://introtor-pse.appspot.com/class3ppd.html): Writing LaTeX articles and making websites using R Markdown
 
-[Class 3 APE](https://introtor-pse.appspot.com/class3ape.html)
-
-[Class 4](https://introtor-pse.appspot.com/class4.html)
-
+[Class 4](https://introtor-pse.appspot.com/class4.html): Introduction to web scraping with R
 
 # APE slack channel 
 
-[Slack invitation link](https://join.slack.com/t/introtor/shared_invite/enQtNDE5NDQ1NDk3ODQxLWE3ZTMxMzA2YTBmYTY3ZDUxMjkyZDM2OTc4MTAxY2VjZjE0NzE5NTMyNmUzOTA0ZGI4NGQ1ZTEzZmQ3ZGNmYWE)
-
+[Slack invitation link](https://join.slack.com/t/introtor/shared_invite/enQtNDM5ODYwMzY4NjEwLWVjYzNlYzc3YTU4OGI2MjUxNDVkZDAxYTQ4MTFmMWE0NmZhMGEzYzY1NzY3MDdhM2M4ZjI2OWI3ZDBiZTc0OTk)
 
 

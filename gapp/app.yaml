@@ -15,10 +15,6 @@ handlers:
   static_files: www/class2.html
   upload: www/class2.html
 
-- url: /class3prep\.html
-  static_files: www/class3prep.html
-  upload: www/class3prep.html
-
 - url: /class3ppd\.html
   static_files: www/class3ppd.html
   upload: www/class3ppd.html

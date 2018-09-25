@@ -133,6 +133,8 @@ Regex      | Meaning   | Some examples
 `"^[0-9]{5}$"`       | A string with 5 digits between 0 and 9 | `"01234"`
 
 
+![xkcd](Data/regular_expressions.png)
+
 ## XPaths
 
 If you access the page [List of current heads of state and government](https://en.wikipedia.org/wiki/List_of_current_heads_of_state_and_government) and right-click to view the source code, then you can see the html code behind the website. 
@@ -254,7 +256,7 @@ get_party_example <- "https://en.wikipedia.org/wiki/Donald_Trump" %>%
   html_table(fill=TRUE) %>%
   .[[1]] %>%
   set_tidy_names() %>%
-  filter(grepl("*olitical.*arty", .[,1])) %>%
+  filter(grepl(".olitical.*arty", .[,1])) %>%
   .[1,2]
 ```
 
@@ -270,7 +272,7 @@ get_party <- function(leader_link) {
     html_table(fill=TRUE) %>%
     .[[1]] %>%
     set_tidy_names() %>%
-    filter(grepl('*olitical.*arty', .[,1])) %>%
+    filter(grepl('.olitical.*arty', .[,1])) %>%
     .[1,2]
 }
 ```
