@@ -1,7 +1,7 @@
 ---
 title: "Introduction to R"
 author: "Hannah Bull and Pauline Charousset"
-date: "Semester 1, 2018"
+date: "Semester 1, 2019"
 output: 
  html_document:
     number_sections: true
